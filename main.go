@@ -1,16 +1,23 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/mehmetymw/grpc-testgen/internal/config"
 	"github.com/mehmetymw/grpc-testgen/internal/generator"
-
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
+func initLogger() {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).With().Timestamp().Logger()
+}
+
 func main() {
+	initLogger()
+
 	var cfgFile string
 
 	var rootCmd = &cobra.Command{
@@ -18,17 +25,15 @@ func main() {
 		Short: "A CLI tool for generating gRPC test cases",
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := run(cfgFile); err != nil {
-				fmt.Println("Error:", err)
-				os.Exit(1)
+				log.Fatal().Err(err).Msg("Error running grpc-testgen")
 			}
 		},
 	}
 
-	rootCmd.Flags().StringVarP(&cfgFile, "config", "c", "configs/grpc-testgen.yaml", "config file")
+	rootCmd.Flags().StringVarP(&cfgFile, "config", "c", "configs/grpc-testgen.yaml", "Config file")
 
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println("Error executing command:", err)
-		os.Exit(1)
+		log.Fatal().Err(err).Msg("Error executing command")
 	}
 }
 

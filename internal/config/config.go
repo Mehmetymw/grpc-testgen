@@ -1,29 +1,32 @@
 package config
 
 import (
-	"os"
+	"fmt"
 
-	"gopkg.in/yaml.v3"
+	"github.com/spf13/viper"
 )
 
 type Config struct {
-	Language     string `yaml:"language"`
-	InputDir     string `yaml:"input"`
-	OutputDir    string `yaml:"output"`
-	ChatGPTKey   string `yaml:"chatgpt_api_key"`
-	ChatGPTModel string `yaml:"chatgpt_model"`
-	GRPCServer   string `yaml:"grpc_server"`
+	Language          string `mapstructure:"language"`
+	Input             string `mapstructure:"input"`
+	Output            string `mapstructure:"output"`
+	ChatGPTAPIKey     string `mapstructure:"chatgpt_api_key"`
+	ChatGPTModel      string `mapstructure:"chatgpt_model"`
+	GRPCServerAddress string `mapstructure:"grpc_server_address"`
 }
 
 func LoadConfig(filePath string) (*Config, error) {
-	file, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, err
+	viper.SetConfigFile(filePath)
+	viper.SetConfigType("yaml")
+	viper.AutomaticEnv() // read environment variables
+
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
 
 	var cfg Config
-	if err := yaml.Unmarshal(file, &cfg); err != nil {
-		return nil, err
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return nil, fmt.Errorf("error unmarshalling config file: %w", err)
 	}
 
 	return &cfg, nil

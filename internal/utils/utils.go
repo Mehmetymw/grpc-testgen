@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 )
 
+// GetProtoFiles retrieves all .proto files from the input directory
 func GetProtoFiles(inputDir string) ([]string, error) {
 	var protoFiles []string
 
@@ -23,4 +24,21 @@ func GetProtoFiles(inputDir string) ([]string, error) {
 	}
 
 	return protoFiles, nil
+}
+
+// CreateDirIfNotExists creates a directory if it does not exist
+func CreateDirIfNotExists(dirPath string) error {
+	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+		err := os.MkdirAll(dirPath, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// CreateFile creates a file with the specified content
+func CreateFile(filePath string, content []byte) error {
+	err := os.WriteFile(filePath, content, 0644)
+	return err
 }
